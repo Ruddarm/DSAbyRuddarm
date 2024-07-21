@@ -13,15 +13,15 @@ public class MaxHeap<T extends Comparable<T>> {
     }
 
     public MaxHeap(T array[]) {
-        this.heap =  new ArrayList<>();
+        this.heap = new ArrayList<>();
         for (T val : array) {
             heap.add(val);
         }
         this.size = this.heap.size();
-
+        buildMaxHeap();
     }
 
-    public void build_MaxHeap() {
+    public void buildMaxHeap() {
         int i = 0;
         for (i = (this.size / 2) - 1; i >= 0; i--) {
             this.HeapifyDown(i);
@@ -53,17 +53,21 @@ public class MaxHeap<T extends Comparable<T>> {
         this.heap.set(index, val);
 
     }
-    public void heapSort(){
-        build_MaxHeap();
-        for (int i = this.size-1;i<=1;i--){
-            T temp= this.heap.get(1);
-            this.heap.set(1, this.heap.get(i));
+
+    public void heapSort() {
+        buildMaxHeap();
+        int ogheight = this.size;
+        for (int i = this.size - 1; i > 0; i--) {
+            T temp = this.heap.get(0);
+            this.heap.set(0, this.heap.get(i));
             this.heap.set(i, temp);
-            this.size-=1;
-            this.HeapifyDown(i);
+            this.size--;
+            this.HeapifyDown(0);
         }
+        this.size = ogheight;
     }
-    public ArrayList<T> getheap(){
+
+    public ArrayList<T> getHeap() {
         return this.heap;
     }
 
@@ -71,10 +75,10 @@ public class MaxHeap<T extends Comparable<T>> {
         int left = (index * 2) + 1;
         int right = (index * 2) + 2;
         int largest = index;
-        if (left < heap.size() && (this.heap.get(left).compareTo(this.heap.get(index)) > 0)) {
+        if (left < this.size && (this.heap.get(left).compareTo(this.heap.get(index)) > 0)) {
             largest = left;
         }
-        if (right < this.heap.size() && (this.heap.get(right).compareTo(this.heap.get(index)) > 0)) {
+        if (right < this.size && (this.heap.get(right).compareTo(this.heap.get(largest)) > 0)) {
             largest = right;
         }
         if (largest != index) {
@@ -99,9 +103,9 @@ public class MaxHeap<T extends Comparable<T>> {
             // return null;
         }
         T maxValue = this.heap.get(0);
-        T lastValue = this.heap.remove(this.size-1);
+        T lastValue = this.heap.remove(this.size - 1);
         this.size--;
-        if(!this.heap.isEmpty()){
+        if (!this.heap.isEmpty()) {
             this.heap.set(0, lastValue);
             this.HeapifyDown(0);
         }
