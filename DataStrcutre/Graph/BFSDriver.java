@@ -1,7 +1,9 @@
 package DSAbyRuddarm.DataStrcutre.Graph;
 
+import java.security.spec.EdECPoint;
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.Stack;
 
 // class to represent an edge in the graph
 class Edge {
@@ -78,7 +80,7 @@ class Graph {
         }
     }
 
-    // metho to find path
+    // metho to find patfh
     public boolean hasPathUtil(int src, int des, boolean visited[]) {
         visited[src] = true;
         if (src == des)
@@ -91,7 +93,7 @@ class Graph {
 
     }
 
-    // A method to detect cylce in graph
+    // A method to detect cylce in graph directed and undircted graph
     public boolean detectCycleUtil(int curr, int parent, boolean[] visited) {
         visited[curr] = true;
         for (Edge e : graph.get(curr)) {
@@ -105,6 +107,30 @@ class Graph {
         }
         return false;
     }
+    public boolean detectCycleUtil(int curr , boolean[] visited, boolean [] stack){
+        visited[curr]= true;
+        stack[curr] = true;
+        for(Edge e  : graph.get(curr)){
+            if(!visited[e.dest]){
+                return detectCycleUtil(e.dest, visited, stack);
+            }else if(stack[curr]){
+                return true;
+            }
+        }
+        stack[curr]=false;
+        return false;
+    }
+    // find topo logical order for dag graph
+    public void topsort(int curr, boolean [] visited, Stack<Integer> stack){
+        visited[curr] = true;
+        for(Edge edge : graph.get(curr)){
+            if(!visited[edge.dest]){
+                topsort(curr, visited, stack);
+            }
+        }
+        stack.push(curr);
+    }
+    
 
 }
 
