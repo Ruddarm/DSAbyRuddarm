@@ -1,9 +1,13 @@
 package DSAbyRuddarm.DataStrcutre.Graph;
 
-import java.security.spec.EdECPoint;
+import java.security.interfaces.EdECKey;
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.Scanner;
 import java.util.Stack;
+
+import DSAbyRuddarm.DataStrcutre.ArrayList.Arraylist;
 
 // class to represent an edge in the graph
 class Edge {
@@ -107,30 +111,76 @@ class Graph {
         }
         return false;
     }
-    public boolean detectCycleUtil(int curr , boolean[] visited, boolean [] stack){
-        visited[curr]= true;
+
+    // dectecting cycle
+    public boolean detectCycleUtil(int curr, boolean[] visited, boolean[] stack) {
+        visited[curr] = true;
         stack[curr] = true;
-        for(Edge e  : graph.get(curr)){
-            if(!visited[e.dest]){
+        for (Edge e : graph.get(curr)) {
+            if (!visited[e.dest]) {
                 return detectCycleUtil(e.dest, visited, stack);
-            }else if(stack[curr]){
+            } else if (stack[e.dest]) {
                 return true;
             }
         }
-        stack[curr]=false;
+        stack[curr] = false;
         return false;
     }
-    // find topo logical order for dag graph
-    public void topsort(int curr, boolean [] visited, Stack<Integer> stack){
+
+    // find topo logical order for dag graph using dfs
+    public void topsort(int curr, boolean[] visited, Stack<Integer> stack) {
         visited[curr] = true;
-        for(Edge edge : graph.get(curr)){
-            if(!visited[edge.dest]){
-                topsort(curr, visited, stack);
+        for (Edge edge : graph.get(curr)) {
+            if (!visited[edge.dest]) {
+                topsort(edge.dest, visited, stack);
             }
         }
         stack.push(curr);
     }
-    
+
+    // incoming outgoing
+    public void calInDeg(int[] indeg) {
+        for (ArrayList<Edge> g : graph) {
+            for (Edge e : g) {
+                indeg[e.dest]++;
+            }
+        }
+    }
+
+    // topsort bfs
+    public void topsort(int src) {
+        int indeg[] = new int[graph.size()];
+        Queue<Integer> queue = new LinkedList<>();
+        calInDeg(indeg);
+        for (int i = 0; i < indeg.length; i++) {
+            if (indeg[i] == 0) {
+                queue.offer(i);
+            }
+        }
+        while (!queue.isEmpty()) {
+            int curr = queue.poll();
+            System.out.println(curr + " --> ");
+            for (Edge e : graph.get(curr)) {
+                indeg[e.dest]--;
+                if (indeg[e.dest] == 0) {
+                    queue.add(e.dest);
+                }
+            }
+        }
+    }
+
+    // is birpartile
+    public boolean birepartile(int curr, boolean visited[], int[] group) {
+        visited[curr] = true;
+        // group[]
+        for (Edge edge : graph.get(curr)) {
+            if (group[edge.dest] != -1 && group[curr] == group[edge.dest]) {
+                return false;
+            }
+
+        }
+        return false;
+    }
 
 }
 
@@ -147,7 +197,10 @@ public class BFSDriver {
             System.out.println("2 Add Edge ");
             System.out.println("3 Perform BFS ");
             System.out.println("4 Perform DFS ");
-            System.out.println("5 Exit ");
+            System.out.println("5 Detect Cycle");
+            System.out.println("6 Find path");
+            System.out.println("7 Perform Topological sort");
+            System.out.println("0 Exit ");
             System.out.print("Enter your option: ");
             option = bfsDriver.sc.nextInt();
             switch (option) {
@@ -164,7 +217,20 @@ public class BFSDriver {
                     bfsDriver.performDFS();
                     break;
                 case 5:
+                    bfsDriver.detectCylce();
+                    break;
+                case 6:
+                    bfsDriver.hasPath();
+                    break;
+                case 7:
+                    bfsDriver.topoSort();
+                    break;
+                case 8:
+                    bfsDriver.BfsTopoSort();
+
+                case 0:
                     key = false;
+                    break;
                 default:
                     break;
             }
@@ -253,18 +319,60 @@ public class BFSDriver {
 
     // detect cycle
     public void detectCylce() {
-        boolean visited[] = new boolean[graph.graph.size()];
-        boolean isCycle = false;
-        for (int i = 0; i < graph.graph.size(); i++) {
-            if (!visited[i]) {
-                if (graph.detectCycleUtil(i, -1, visited)) {
-                    System.out.println("Cycle Found : True");
-                    return;
+        System.out.println("1 : For undirected Graph");
+        System.out.println("2 : For directed Graph");
+        System.out.println("0 : exit");
+        switch (sc.nextInt()) {
+            case 1: {
+                boolean visited[] = new boolean[graph.graph.size()];
+                for (int i = 0; i < graph.graph.size(); i++) {
+                    if (!visited[i]) {
+                        if (graph.detectCycleUtil(i, -1, visited)) {
+                            System.out.println("Cycle Found : True");
+                            return;
+                        }
+                    }
                 }
+                break;
             }
+            case 2: {
+                boolean visited[] = new boolean[graph.graph.size()];
+                boolean stack[] = new boolean[graph.graph.size()];
+                for (int i = 0; i < graph.graph.size(); i++) {
+                    if (!visited[i]) {
+                        if (graph.detectCycleUtil(i, visited, stack)) {
+                            System.out.println("Cycle Found : True");
+                            return;
+                        }
+                    }
+                }
+                break;
+            }
+            case 0:
+                return;
+            default:
+                return;
         }
         System.out.println("Cycle Found : False");
 
+    }
+
+    // perofrm toplogical sort
+    public void topoSort() {
+        boolean visited[] = new boolean[graph.graph.size()];
+        Stack<Integer> stack = new Stack<>();
+        for (int i = 0; i < graph.graph.size(); i++) {
+            if (!visited[i]) {
+                graph.topsort(i, visited, stack);
+                while (!stack.isEmpty()) {
+                    System.out.println(stack.pop() + " --> ");
+                }
+            }
+        }
+    }
+
+    public void BfsTopoSort() {
+        graph.topsort(0);
     }
 
 }
